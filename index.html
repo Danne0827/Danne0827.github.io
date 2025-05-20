@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>💗 Love you 💗 My Dear XXX💗</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Ma+Shan+Zheng&family=Playfair+Display:ital,wght@1,600&display=swap');
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 粉色爱心背景动画 */
+    #pinkboard {
+      animation: scaleAnim 1.5s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes scaleAnim {
+      0%, 100% { transform: scale(1.0); }
+      25%, 75% { transform: scale(0.9); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* 隐藏按钮样式 - 优化版 */
+    #hiddenButton {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      font-size: 20px;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(45deg, #ff2a6d, #ff90b3, #ffc2d1);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      opacity: 0.1;
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 20px rgba(255, 105, 180, 0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      letter-spacing: 1px;
+      overflow: hidden;
+    }
+    
+    #hiddenButton:hover {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-5px);
+      box-shadow: 0 8px 25px rgba(255, 105, 180, 0.7);
+    }
+    
+    #hiddenButton::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: 0.5s;
+    }
+    
+    #hiddenButton:hover::before {
+      left: 100%;
+    }
+
+    /* 消息覆盖层容器 */
+    #messageOverlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      opacity: 0;
+      transition: all 1s cubic-bezier(0.215, 0.610, 0.355, 1.000);
+      z-index: 20;
+      pointer-events: none;
+      padding: 20px;
+      width: 80%;
+      max-width: 800px;
+    }
+    
+    /* 中文句子容器 */
+    .chinese-text-container {
+      position: relative;
+      height: 60px;
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    /* 中文句子 */
+    .chinese-text {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 0;
+      background: linear-gradient(90deg, #ffd1ff, #ffb5db, #ffc8e6, #ffdaf1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      position: relative;
+      text-align: center;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px rgba(255, 168, 209, 0.7), 0 0 20px rgba(255, 168, 209, 0.5);
+      filter: drop-shadow(0 0 10px rgba(255, 147, 191, 0.5));
+    }
+    
+    /* 英文句子 */
+    .english-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: 0;
+      background: linear-gradient(120deg, #89f7fe, #66a6ff, #e0c3fc, #8ec5fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s;
+      letter-spacing: 1px;
+      text-shadow: 0 0 5px rgba(126, 187, 255, 0.7), 0 0 20px rgba(126, 187, 255, 0.5);
+      filter: drop-shadow(0 0 10px rgba(126, 187, 255, 0.5));
+    }
+    
+    /* 句子显示状态 */
+    #messageOverlay.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    #messageOverlay.show .chinese-text {
+      font-size: 64px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    #messageOverlay.show .english-text {
+      font-size: 52px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* 字体光晕动画 */
+    @keyframes glowChinese {
+      0% { text-shadow: 0 0 5px rgba(255, 168, 209, 0.7), 0 0 10px rgba(255, 168, 209, 0.5); }
+      50% { text-shadow: 0 0 15px rgba(255, 168, 209, 1), 0 0 25px rgba(255, 168, 209, 0.8); }
+      100% { text-shadow: 0 0 5px rgba(255, 168, 209, 0.7), 0 0 10px rgba(255, 168, 209, 0.5); }
+    }
+    
+    @keyframes glowEnglish {
+      0% { text-shadow: 0 0 5px rgba(126, 187, 255, 0.7), 0 0 10px rgba(126, 187, 255, 0.5); }
+      50% { text-shadow: 0 0 15px rgba(126, 187, 255, 1), 0 0 25px rgba(126, 187, 255, 0.8); }
+      100% { text-shadow: 0 0 5px rgba(126, 187, 255, 0.7), 0 0 10px rgba(126, 187, 255, 0.5); }
+    }
+    
+    #messageOverlay.show .chinese-text {
+      animation: glowChinese 2s infinite;
+    }
+    
+    #messageOverlay.show .english-text {
+      animation: glowEnglish 2.5s infinite;
+    }
+    
+    /* 打字机效果 */
+    .typewriter::after {
+      content: '|';
+      position: absolute;
+      right: -15px;
+      top: 0;
+      color: white;
+      animation: blink 0.75s step-end infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* 在句子周围添加装饰效果 */
+    .text-decorator {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      top: -15px;
+      left: 0;
+      transform: scaleX(0);
+      transition: transform 1s ease 1s;
+    }
+    
+    .text-decorator-bottom {
+      top: auto;
+      bottom: -15px;
+    }
+    
+    #messageOverlay.show .text-decorator {
+      transform: scaleX(1);
+    }
+    
+    /* 音乐控制按钮 */
+    #musicControl {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 30;
+      transition: all 0.3s ease;
+    }
+    
+    #musicControl:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    #musicControl span {
+      color: white;
+      font-size: 20px;
+    }
+    
+    /* 音乐播放动画 */
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #musicControl.playing {
+      animation: rotate 5s linear infinite;
+    }
+    
+    /* 文字背景光晕效果 */
+    .text-glow {
+      position: absolute;
+      width: 0%;
+      height: 100%;
+      top: 0;
+      left: 50%;
+      background: radial-gradient(ellipse at center, rgba(255, 192, 203, 0.3) 0%, transparent 70%);
+      transform: translateX(-50%);
+      transition: width 1.5s ease;
+      z-index: -1;
+      filter: blur(10px);
+    }
+    
+    #messageOverlay.show .text-glow {
+      width: 120%;
+    }
+    
+    /* 心形粒子在文字显示时 */
+    .heart-particle {
+      position: absolute;
+      background-size: contain;
+      opacity: 0;
+      z-index: 25;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 爱心粒子背景 -->
+  <canvas id="pinkboard"></canvas>
+
+  <!-- 飞舞文字爱心 -->
+  <canvas id="canvas"></canvas>
+
+  <!-- 隐藏按钮 -->
+  <button id="hiddenButton">雅婷的星光</button>
+
+  <!-- 弹出的中英文句子 -->
+  <div id="messageOverlay">
+    <div class="chinese-text-container">
+      <div class="text-decorator"></div>
+      <div class="chinese-text"></div>
+      <div class="text-decorator text-decorator-bottom"></div>
+      <div class="text-glow"></div>
+    </div>
+    <div class="english-text"></div>
+  </div>
+  
+  <!-- 音乐控制按钮 -->
+  <div id="musicControl">
+    <span>♪</span>
+  </div>
+  
+  <!-- 背景音乐 -->
+  <audio id="bgMusic" loop>
+    <source src="https://music.163.com/song/media/outer/url?id=1391477429.mp3" type="audio/mpeg">
+    您的浏览器不支持音频元素。
+  </audio>
+
+  <script>
+    // 飞舞爱心符号 - 修改为绘制❤符号
+    const heartSymbol = "❤";
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const ww = canvas.width;
+    const wh = canvas.height;
+    const colors = ["#eec996", "#8fb7d3", "#b7d4c6", "#c3bedd", "#f1d5e4", "#cae1d3", "#f3c89d", "#d0b0c3", "#819d53", "#c99294", "#cec884", "#ff8e70", "#e0a111", "#fffdf6", "#cbd7ac", "#e8c6c0", "#dc9898", "#ecc8ba"];
+
+    const texts = [];
+
+    function TextParticle() {
+      this.x = Math.random() * ww;
+      this.y = Math.random() * wh;
+      this.opacity = Math.random() * 0.5 + 0.5;
+      this.vel = { x: (Math.random() - 0.5) * 4, y: (Math.random() - 0.5) * 4 };
+      this.targetScale = Math.random() * 0.15 + 0.02;
+      this.scale = this.targetScale * Math.random();
+    }
+
+    TextParticle.prototype.update = function () {
+      this.x += this.vel.x;
+      this.y += this.vel.y;
+      this.scale += (this.targetScale - this.scale) * 0.01;
+      this.width = 473.8;
+      this.height = 408.6;
+
+      if (this.x - this.width > ww || this.x + this.width < 0) {
+        this.scale = 0;
+        this.x = Math.random() * ww;
+      }
+      if (this.y - this.height > wh || this.y + this.height < 0) {
+        this.scale = 0;
+        this.y = Math.random() * wh;
+      }
+    };
+
+    TextParticle.prototype.draw = function (i) {
+      ctx.globalAlpha = this.opacity;
+      ctx.font = `${360 * this.scale}px "Arial"`;  // 调整大小以适应心形符号
+      ctx.fillStyle = colors[i % colors.length];
+      
+      // 直接绘制❤符号
+      ctx.fillText(
+        heartSymbol,
+        this.x - this.width * 0.5,
+        this.y,
+        this.width,
+        this.height
+      );
+    };
+
+    for (let i = 0; i < 80; i++) {
+      texts.push(new TextParticle());
+    }
+
+    function renderText() {
+      ctx.clearRect(0, 0, ww, wh);
+      texts.forEach((text, i) => {
+        text.update();
+        text.draw(i);
+      });
+      requestAnimationFrame(renderText);
+    }
+
+    renderText();
+  </script>
+
+  <script>
+    // 爱心粒子系统代码
+    /*
+     * Settings
+     */
+    var settings = {
+        particles: {
+            length: 500, // maximum amount of particles
+            duration: 2, // particle duration in sec
+            velocity: 100, // particle velocity in pixels/sec
+            effect: -0.75, // play with this for a nice effect
+            size: 45, // particle size in pixels
+        },
+    };
+
+    /*
+     * RequestAnimationFrame polyfill by Erik Möller
+     */
+    (function () {
+        var b = 0;
+        var c = ["ms", "moz", "webkit", "o"];
+        for (var a = 0; a < c.length && !window.requestAnimationFrame; ++a) {
+            window.requestAnimationFrame = window[c[a] + "RequestAnimationFrame"];
+            window.cancelAnimationFrame =
+                window[c[a] + "CancelAnimationFrame"] ||
+                window[c[a] + "CancelRequestAnimationFrame"];
+        }
+        if (!window.requestAnimationFrame) {
+            window.requestAnimationFrame = function (h, e) {
+                var d = new Date().getTime();
+                var f = Math.max(0, 16 - (d - b));
+                var g = window.setTimeout(function () {
+                    h(d + f);
+                }, f);
+                b = d + f;
+                return g;
+            };
+        }
+        if (!window.cancelAnimationFrame) {
+            window.cancelAnimationFrame = function (d) {
+                clearTimeout(d);
+            };
+        }
+    })();
+
+    /*
+     * Point class
+     */
+    var Point = (function () {
+        function Point(x, y) {
+            this.x = typeof x !== "undefined" ? x : 0;
+            this.y = typeof y !== "undefined" ? y : 0;
+        }
+
+        Point.prototype.clone = function () {
+            return new Point(this.x, this.y);
+        };
+        Point.prototype.length = function (length) {
+            if (typeof length == "undefined")
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            this.normalize();
+            this.x *= length;
+            this.y *= length;
+            return this;
+        };
+        Point.prototype.normalize = function () {
+            var length = this.length();
+            this.x /= length;
+            this.y /= length;
+            return this;
+        };
+        return Point;
+    })();
+
+    /*
+     * Particle class
+     */
+
+    var Particle = (function () {
+        function Particle() {
+            this.position = new Point();
+            this.velocity = new Point();
+            this.acceleration = new Point();
+            this.age = 0;
+        }
+
+        Particle.prototype.initialize = function (x, y, dx, dy) {
+            this.position.x = x;
+            this.position.y = y;
+            this.velocity.x = dx;
+            this.velocity.y = dy;
+            this.acceleration.x = dx * settings.particles.effect;
+            this.acceleration.y = dy * settings.particles.effect;
+            this.age = 0;
+        };
+        Particle.prototype.update = function (deltaTime) {
+            this.position.x += this.velocity.x * deltaTime;
+            this.position.y += this.velocity.y * deltaTime;
+            this.velocity.x += this.acceleration.x * deltaTime;
+            this.velocity.y += this.acceleration.y * deltaTime;
+            this.age += deltaTime;
+        };
+        Particle.prototype.draw = function (context, image) {
+            function ease(t) {
+                return --t * t * t + 1;
+            }
+
+            var size = image.width * ease(this.age / settings.particles.duration);
+            context.globalAlpha = 1 - this.age / settings.particles.duration;
+            context.drawImage(
+                image,
+                this.position.x - size / 2,
+                this.position.y - size / 2,
+                size,
+                size
+            );
+        };
+        return Particle;
+    })();
+
+    /*
+     * ParticlePool class
+     */
+    var ParticlePool = (function () {
+        var particles,
+            firstActive = 0,
+            firstFree = 0,
+            duration = settings.particles.duration;
+
+        function ParticlePool(length) {
+            // create and populate particle pool
+            particles = new Array(length);
+            for (var i = 0; i < particles.length; i++)
+                particles[i] = new Particle();
+        }
+
+        ParticlePool.prototype.add = function (x, y, dx, dy) {
+            particles[firstFree].initialize(x, y, dx, dy);
+
+            // handle circular queue
+            firstFree++;
+            if (firstFree == particles.length) firstFree = 0;
+            if (firstActive == firstFree) firstActive++;
+            if (firstActive == particles.length) firstActive = 0;
+        };
+        ParticlePool.prototype.update = function (deltaTime) {
+            var i;
+
+            // update active particles
+            if (firstActive < firstFree) {
+                for (i = firstActive; i < firstFree; i++)
+                    particles[i].update(deltaTime);
+            }
+            if (firstFree < firstActive) {
+                for (i = firstActive; i < particles.length; i++)
+                    particles[i].update(deltaTime);
+                for (i = 0; i < firstFree; i++) particles[i].update(deltaTime);
+            }
+
+            // remove inactive particles
+            while (
+                particles[firstActive].age >= duration &&
+                firstActive != firstFree
+                ) {
+                firstActive++;
+                if (firstActive == particles.length) firstActive = 0;
+            }
+        };
+        ParticlePool.prototype.draw = function (context, image) {
+            // draw active particles
+            if (firstActive < firstFree) {
+                for (i = firstActive; i < firstFree; i++)
+                    particles[i].draw(context, image);
+            }
+            if (firstFree < firstActive) {
+                for (i = firstActive; i < particles.length; i++)
+                    particles[i].draw(context, image);
+                for (i = 0; i < firstFree; i++) particles[i].draw(context, image);
+            }
+        };
+        return ParticlePool;
+    })();
+
+    /*
+     * Putting it all together
+     */
+    (function (canvas) {
+        var context = canvas.getContext("2d"),
+            particles = new ParticlePool(settings.particles.length),
+            particleRate =
+                settings.particles.length / settings.particles.duration, // particles/sec
+            time;
+
+        // get point on heart with -PI <= t <= PI
+        function pointOnHeart(t) {
+            return new Point(
+                160 * Math.pow(Math.sin(t), 3),
+                130 * Math.cos(t) -
+                50 * Math.cos(2 * t) -
+                20 * Math.cos(3 * t) -
+                10 * Math.cos(4 * t) +
+                25
+            );
+        }
+
+        // creating the particle image using a dummy canvas
+        var image = (function () {
+            var canvas = document.createElement("canvas"),
+                context = canvas.getContext("2d");
+            canvas.width = settings.particles.size;
+            canvas.height = settings.particles.size;
+
+            // helper function to create the path
+            function to(t) {
+                var point = pointOnHeart(t);
+                point.x =
+                    settings.particles.size / 2 +
+                    (point.x * settings.particles.size) / 350;
+                point.y =
+                    settings.particles.size / 2 -
+                    (point.y * settings.particles.size) / 350;
+                return point;
+            }
+
+            // create the path
+            context.beginPath();
+            var t = -Math.PI;
+            var point = to(t);
+            context.moveTo(point.x, point.y);
+            while (t < Math.PI) {
+                t += 0.01; // baby steps!
+                point = to(t);
+                context.lineTo(point.x, point.y);
+            }
+            context.closePath();
+            // create the fill
+            context.fillStyle = "#ea80b0";
+            context.fill();
+            // create the image
+            var image = new Image();
+            image.src = canvas.toDataURL();
+            return image;
+        })();
+
+        // render that thing!
+        function render() {
+            // next animation frame
+            requestAnimationFrame(render);
+
+            // update time
+            var newTime = new Date().getTime() / 1000,
+                deltaTime = newTime - (time || newTime);
+            time = newTime;
+
+            // clear canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // create new particles
+            var amount = particleRate * deltaTime;
+            for (var i = 0; i < amount; i++) {
+                var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
+                var dir = pos.clone().length(settings.particles.velocity);
+                particles.add(
+                    canvas.width / 2 + pos.x,
+                    canvas.height / 2 - pos.y,
+                    dir.x,
+                    -dir.y
+                );
+            }
+
+            // update and draw particles
+            particles.update(deltaTime);
+            particles.draw(context, image);
+        }
+
+        // handle (re-)sizing of the canvas
+        function onResize() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+
+        window.onresize = onResize;
+
+        // delay rendering bootstrap
+        setTimeout(function () {
+            onResize();
+            render();
+        }, 10);
+    })(document.getElementById("pinkboard"));
+  </script>
+
+  <script>
+    // 增强的文字动画效果和交互
+    const hiddenButton = document.getElementById("hiddenButton");
+    const messageOverlay = document.getElementById("messageOverlay");
+    const bgMusic = document.getElementById("bgMusic");
+    const musicControl = document.getElementById("musicControl");
+    const chineseText = document.querySelector(".chinese-text");
+    const englishText = document.querySelector(".english-text");
+    
+    // 音乐控制
+    let musicPlaying = false;
+    
+    musicControl.addEventListener("click", () => {
+      if (musicPlaying) {
+        bgMusic.pause();
+        musicControl.classList.remove("playing");
+      } else {
+        bgMusic.play();
+        musicControl.classList.add("playing");
+      }
+      musicPlaying = !musicPlaying;
+    });
+    
+    // 创建心形粒子
+    function createHeartParticles() {
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        setTimeout(() => {
+          const particle = document.createElement("div");
+          particle.className = "heart-particle";
+          
+          // 随机大小和位置
+          const size = Math.random() * 20 + 10;
+          const left = Math.random() * window.innerWidth;
+          const top = messageOverlay.offsetTop + Math.random() * 200 - 100;
+          
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${left}px`;
+          particle.style.top = `${top}px`;
+          
+          // 创建SVG爱心
+          const heartColor = Math.random() > 0.5 ? "#ff7eb9" : "#7eb8ff";
+          particle.innerHTML = `
+            <svg viewBox="0 0 50 50">
+              <path fill="${heartColor}" d="M25 39.7l-.6-.5C11.5 28.7 8 25 8 19c0-5 4-9 9-9 4.1 0 6.4 2.3 8 4.1 1.6-1.8 3.9-4.1 8-4.1 5 0 9 4 9 9 0 6-3.5 9.7-16.4 20.2l-.6.5z"/>
+            </svg>
+          `;
+          
+          document.body.appendChild(particle);
+          
+          // 动画
+          particle.style.transition = `all ${Math.random() * 3 + 2}s ease-out`;
+          
+          // 延迟设置开始动画
+          setTimeout(() => {
+            particle.style.opacity = "0.8";
+            particle.style.transform = `translate(${Math.random() * 100 - 50}px, ${-Math.random() * 200 - 100}px) rotate(${Math.random() * 360}deg)`;
+          }, 10);
+          
+          // 移除元素
+          setTimeout(() => {
+            particle.remove();
+          }, 5000);
+        }, i * 200);
+      }
+    }
+    
+    // 实现打字机效果
+    function typeWriterEffect(text, element, speed = 100) {
+      return new Promise(resolve => {
+        let i = 0;
+        element.textContent = '';
+        
+        // 添加闪烁光标
+        element.classList.add('typewriter');
+        
+        const typing = setInterval(() => {
+          if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+          } else {
+            clearInterval(typing);
+            element.classList.remove('typewriter');
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    hiddenButton.addEventListener("click", async () => {
+      // 显示覆盖层
+      messageOverlay.classList.add("show");
+      
+      // 播放音乐
+      if (!musicPlaying) {
+        bgMusic.play().catch(e => console.log("无法自动播放音乐，需要用户交互: ", e));
+        musicPlaying = true;
+        musicControl.classList.add("playing");
+      }
+      
+      // 添加背景闪烁效果
+      document.body.style.transition = "background 1s";
+      document.body.style.background = "#1a0a1f";
+      setTimeout(() => {
+        document.body.style.background = "#000";
+      }, 300);
+      
+      // 使用打字机效果显示中文
+      await typeWriterEffect("你让我的宇宙有了诗意轨道", chineseText, 120);
+      
+      // 显示英文
+      englishText.textContent = "You're the celestial poetry in my ordinary universe";
+      
+      // 创建心形粒子
+      createHeartParticles();
+      
+      // 设置定时器关闭消息
+      setTimeout(() => {
+        messageOverlay.classList.remove("show");
+      }, 8000);
+    });
+
+    // 按 Shift + Y 显示按钮，并添加淡入效果
+    document.addEventListener("keydown", function (e) {
+      if (e.shiftKey && e.key.toLowerCase() === 'y') {
+        hiddenButton.style.opacity = "0.1";
+        hiddenButton.style.display = "block";
+        
+        // 添加缓慢浮现效果
+        let opacity = 0.1;
+        const fadeIn = setInterval(() => {
+          opacity += 0.1;
+          hiddenButton.style.opacity = opacity;
+          if (opacity >= 0.8) {
+            clearInterval(fadeIn);
+          }
+        }, 100);
+      }
+    });
+    
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
