@@ -2,8 +2,18 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>💗 Love you 💗 My Dear XXX💗</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>💗 Love you 💗 My Dear Star💗</title>
+  <!-- 添加自定义字体 -->
   <style>
+    @font-face {
+      font-family: 'CustomFont';
+      src: url('1.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Ma+Shan+Zheng&family=Playfair+Display:ital,wght@1,600&display=swap');
     
     html, body {
@@ -11,6 +21,8 @@
       padding: 0;
       overflow: hidden;
       background: #000;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     canvas {
       position: absolute;
@@ -40,25 +52,32 @@
       transform: translateX(-50%);
       padding: 15px 30px;
       font-size: 20px;
-      font-family: 'Arial', sans-serif;
+      font-family: 'CustomFont', 'Ma Shan Zheng', cursive;
       background: linear-gradient(45deg, #ff2a6d, #ff90b3, #ffc2d1);
       color: white;
       border: none;
       border-radius: 50px;
       cursor: pointer;
-      opacity: 0.1;
+      opacity: 0.9;
       transition: all 0.4s ease;
       box-shadow: 0 5px 20px rgba(255, 105, 180, 0.5);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
       z-index: 10;
       letter-spacing: 1px;
       overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
     }
     
-    #hiddenButton:hover {
+    #hiddenButton:hover, #hiddenButton:active {
       opacity: 1;
       transform: translateX(-50%) translateY(-5px);
       box-shadow: 0 8px 25px rgba(255, 105, 180, 0.7);
+    }
+    
+    #hiddenButton:active {
+      transform: translateX(-50%) translateY(0);
+      box-shadow: 0 2px 10px rgba(255, 105, 180, 0.6);
+      transition: all 0.1s ease;
     }
     
     #hiddenButton::before {
@@ -72,7 +91,7 @@
       transition: 0.5s;
     }
     
-    #hiddenButton:hover::before {
+    #hiddenButton:hover::before, #hiddenButton:active::before {
       left: 100%;
     }
 
@@ -99,14 +118,15 @@
     /* 中文句子容器 */
     .chinese-text-container {
       position: relative;
-      height: 60px;
-      overflow: hidden;
+      overflow: visible;
       width: 100%;
+      min-height: 100px;
+      margin-bottom: 30px;
     }
     
     /* 中文句子 */
     .chinese-text {
-      font-family: 'Ma Shan Zheng', cursive;
+      font-family: 'CustomFont', 'Ma Shan Zheng', cursive;
       font-size: 0;
       background: linear-gradient(90deg, #ffd1ff, #ffb5db, #ffc8e6, #ffdaf1);
       -webkit-background-clip: text;
@@ -116,16 +136,18 @@
       text-align: center;
       width: 100%;
       opacity: 0;
-      transform: translateY(40px);
+      transform: translateY(40px) rotate(-1deg);
       transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
-      letter-spacing: 2px;
+      letter-spacing: a-x;
       text-shadow: 0 0 5px rgba(255, 168, 209, 0.7), 0 0 20px rgba(255, 168, 209, 0.5);
       filter: drop-shadow(0 0 10px rgba(255, 147, 191, 0.5));
+      line-height: 1.5;
+      word-wrap: break-word;
     }
     
     /* 英文句子 */
     .english-text {
-      font-family: 'Dancing Script', cursive;
+      font-family: 'CustomFont', 'Dancing Script', cursive;
       font-size: 0;
       background: linear-gradient(120deg, #89f7fe, #66a6ff, #e0c3fc, #8ec5fc);
       -webkit-background-clip: text;
@@ -134,11 +156,13 @@
       text-align: center;
       width: 100%;
       opacity: 0;
-      transform: translateY(40px);
+      transform: translateY(40px) rotate(-1deg);
       transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s;
       letter-spacing: 1px;
       text-shadow: 0 0 5px rgba(126, 187, 255, 0.7), 0 0 20px rgba(126, 187, 255, 0.5);
       filter: drop-shadow(0 0 10px rgba(126, 187, 255, 0.5));
+      line-height: 1.4;
+      word-wrap: break-word;
     }
     
     /* 句子显示状态 */
@@ -148,15 +172,42 @@
     }
     
     #messageOverlay.show .chinese-text {
-      font-size: 64px;
+      font-size: 54px;
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) rotate(-1deg);
     }
     
     #messageOverlay.show .english-text {
-      font-size: 52px;
+      font-size: 42px;
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) rotate(-1deg);
+    }
+    
+    /* 移动设备上的自适应字体大小 */
+    @media (max-width: 768px) {
+      #messageOverlay.show .chinese-text {
+        font-size: 38px;
+      }
+      
+      #messageOverlay.show .english-text {
+        font-size: 30px;
+      }
+      
+      .chinese-text-container {
+        min-height: 80px;
+        margin-bottom: 20px;
+      }
+    }
+    
+    /* 更小屏幕的适配 */
+    @media (max-width: 480px) {
+      #messageOverlay.show .chinese-text {
+        font-size: 32px;
+      }
+      
+      #messageOverlay.show .english-text {
+        font-size: 26px;
+      }
     }
     
     /* 字体光晕动画 */
@@ -172,12 +223,18 @@
       100% { text-shadow: 0 0 5px rgba(126, 187, 255, 0.7), 0 0 10px rgba(126, 187, 255, 0.5); }
     }
     
+    /* 为飘逸文字添加波浪效果 */
+    @keyframes wave {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+    
     #messageOverlay.show .chinese-text {
-      animation: glowChinese 2s infinite;
+      animation: glowChinese 2s infinite, wave 5s ease-in-out infinite;
     }
     
     #messageOverlay.show .english-text {
-      animation: glowEnglish 2.5s infinite;
+      animation: glowEnglish 2.5s infinite, wave 7s ease-in-out infinite;
     }
     
     /* 打字机效果 */
@@ -231,9 +288,10 @@
       cursor: pointer;
       z-index: 30;
       transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
     }
     
-    #musicControl:hover {
+    #musicControl:hover, #musicControl:active {
       transform: scale(1.1);
       background: rgba(255, 255, 255, 0.3);
     }
@@ -279,6 +337,17 @@
       z-index: 25;
       pointer-events: none;
     }
+    
+    /* 添加脉冲动画到按钮上提高可见度 */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(255, 105, 180, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 105, 180, 0); }
+    }
+    
+    #hiddenButton {
+      animation: pulse 2s infinite;
+    }
   </style>
 </head>
 <body>
@@ -309,8 +378,9 @@
   </div>
   
   <!-- 背景音乐 -->
-  <audio id="bgMusic" loop>
+  <audio id="bgMusic" loop preload="auto">
     <source src="https://music.163.com/song/media/outer/url?id=1391477429.mp3" type="audio/mpeg">
+    <source src="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3" type="audio/mpeg">
     您的浏览器不支持音频元素。
   </audio>
 
@@ -685,21 +755,14 @@
     const chineseText = document.querySelector(".chinese-text");
     const englishText = document.querySelector(".english-text");
     
+    // 检测是否为移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     // 音乐控制
     let musicPlaying = false;
+    let musicAttempted = false;
     
-    musicControl.addEventListener("click", () => {
-      if (musicPlaying) {
-        bgMusic.pause();
-        musicControl.classList.remove("playing");
-      } else {
-        bgMusic.play();
-        musicControl.classList.add("playing");
-      }
-      musicPlaying = !musicPlaying;
-    });
-    
-    // 创建心形粒子
+    // 创建心形粒子函数
     function createHeartParticles() {
       const particleCount = 15;
       
@@ -766,17 +829,28 @@
         }, speed);
       });
     }
+    
+    // 预加载音乐文件
+    bgMusic.load();
+    
+    // 尝试播放音乐函数
+    function attemptPlayMusic() {
+      if (!musicPlaying) {
+        bgMusic.volume = 0.8;
+        bgMusic.play().then(() => {
+          musicPlaying = true;
+          musicControl.classList.add("playing");
+        }).catch(e => console.log("无法自动播放音乐: ", e));
+      }
+    }
 
-    hiddenButton.addEventListener("click", async () => {
-      // 显示覆盖层
+    // 按钮点击处理函数 - 显示文字
+    async function handleButtonClick() {
+      // 显示消息覆盖层
       messageOverlay.classList.add("show");
       
-      // 播放音乐
-      if (!musicPlaying) {
-        bgMusic.play().catch(e => console.log("无法自动播放音乐，需要用户交互: ", e));
-        musicPlaying = true;
-        musicControl.classList.add("playing");
-      }
+      // 尝试播放音乐
+      attemptPlayMusic();
       
       // 添加背景闪烁效果
       document.body.style.transition = "background 1s";
@@ -785,22 +859,67 @@
         document.body.style.background = "#000";
       }, 300);
       
-      // 使用打字机效果显示中文
-      await typeWriterEffect("你让我的宇宙有了诗意轨道", chineseText, 120);
+      // 使用特定中英文句子，不再使用随机选择
+      const chineseMessage = "你让我的宇宙有了诗意轨道";
+      const englishMessage = "You're the celestial poetry in my ordinary universe";
       
-      // 显示英文
-      englishText.textContent = "You're the celestial poetry in my ordinary universe";
+      // 使用打字机效果显示中文
+      await typeWriterEffect(chineseMessage, chineseText, 120);
+      
+      // 使用打字机效果显示英文
+      await typeWriterEffect(englishMessage, englishText, 100);
       
       // 创建心形粒子
       createHeartParticles();
       
-      // 设置定时器关闭消息
+      // 隐藏按钮
+      hiddenButton.style.opacity = "0";
       setTimeout(() => {
-        messageOverlay.classList.remove("show");
-      }, 8000);
-    });
+        hiddenButton.style.display = "none";
+      }, 500);
+    }
 
-    // 按 Shift + Y 显示按钮，并添加淡入效果
+    // 绑定按钮点击事件
+    hiddenButton.addEventListener("click", handleButtonClick);
+    hiddenButton.addEventListener("touchstart", function(e) {
+      e.preventDefault(); // 防止双击缩放
+    });
+    
+    // 音乐控制按钮事件
+    musicControl.addEventListener("click", () => {
+      if (musicPlaying) {
+        bgMusic.pause();
+        musicControl.classList.remove("playing");
+        musicPlaying = false;
+      } else {
+        bgMusic.play().then(() => {
+          musicPlaying = true;
+          musicControl.classList.add("playing");
+        }).catch(e => console.log("无法通过控制按钮播放音乐: ", e));
+      }
+    });
+    
+    // 添加触摸事件支持
+    musicControl.addEventListener("touchstart", function(e) {
+      e.preventDefault(); // 防止双击缩放
+    });
+    
+    // 处理窗口大小变化
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+    
+    // 页面加载后尝试播放音乐
+    window.addEventListener('load', function() {
+      // 为整个文档添加点击事件以播放音乐
+      document.addEventListener('click', function onFirstClick() {
+        attemptPlayMusic();
+        document.removeEventListener('click', onFirstClick);
+      }, { once: true });
+    });
+    
+    // 按 Shift + Y 显示按钮，并添加淡入效果 (保留原代码的这个特性)
     document.addEventListener("keydown", function (e) {
       if (e.shiftKey && e.key.toLowerCase() === 'y') {
         hiddenButton.style.opacity = "0.1";
@@ -816,11 +935,6 @@
           }
         }, 100);
       }
-    });
-    
-    window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
     });
   </script>
 </body>
